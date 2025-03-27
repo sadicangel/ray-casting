@@ -3,6 +3,28 @@ import std::io;
 import std::core::mem;
 import std::math;
 
+const int WINDOW_WIDTH = 512;
+const int WINDOW_HEIGHT = 512;
+const int MAP_WIDTH = 16;
+const int MAP_HEIGHT = 16;
+const String MAP_DATA = 
+    `0000222222220000`
+    `1              0`
+    `1      11111   0`
+    `1     0        0`
+    `0     0  1110000`
+    `0     3        0`
+    `0   10000      0`
+    `0   0   11100  0`
+    `0   0   0      0`
+    `0   0   1  00000`
+    `0       1      0`
+    `2       1      0`
+    `0       0      0`
+    `0 0000000      0`
+    `0              0`
+    `0002222222200000`;
+
 struct Map {
     char[] data;
     int width;
@@ -11,28 +33,6 @@ struct Map {
 
 fn int main(String[] args)
 {
-    const int WINDOW_WIDTH = 512;
-    const int WINDOW_HEIGHT = 512;
-    const int MAP_WIDTH = 16;
-    const int MAP_HEIGHT = 16;
-    const String MAP_DATA = 
-        `0000222222220000`
-        `1              0`
-        `1      11111   0`
-        `1     0        0`
-        `0     0  1110000`
-        `0     3        0`
-        `0   10000      0`
-        `0   0   11100  0`
-        `0   0   0      0`
-        `0   0   1  00000`
-        `0       1      0`
-        `2       1      0`
-        `0       0      0`
-        `0 0000000      0`
-        `0              0`
-        `0002222222200000`;
-
     Image image = {
         .pixels = mem::new_array(Color, WINDOW_WIDTH * WINDOW_HEIGHT),
         .width = WINDOW_WIDTH,
