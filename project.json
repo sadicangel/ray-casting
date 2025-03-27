@@ -27,9 +27,15 @@
   ],
   // C sources if the project also compiles C sources
   // relative to the project file.
-  // "c-sources": [ "csource/**" ],
+  "c-sources": [
+    "csource/**"
+  ],
   // Include directories for C sources relative to the project file.
-  // "c-include-dirs": [ "csource/include" ],
+  "c-include-dirs": [
+    "csource/include",
+    "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt",
+    "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/MSVC/14.44.34918/include"
+  ],
   // Output location, relative to project file.
   "output": "build",
   // Architecture and OS target.
