@@ -31,6 +31,11 @@ struct Map {
     int height;
 }
 
+struct Player {
+    float x;
+    float y;
+}
+
 fn int main(String[] args)
 {
     Image image = {
@@ -44,6 +49,11 @@ fn int main(String[] args)
         .data = MAP_DATA,
         .width = MAP_WIDTH,
         .height = MAP_HEIGHT
+    };
+
+    Player player = {
+        .x = 3.456,
+        .y = 2.345
     };
 
     foreach(i, &pixel : image.pixels) {
@@ -64,7 +74,7 @@ fn int main(String[] args)
         }
     }
 
-
+    image.draw_rectangle((int)std::math::floor(player.x * rect_width), (int)std::math::floor(player.y * rect_height), 5, 5, {255, 255, 255, 255});
     
     if(catch excuse = image.save("output.png")) {
         return 1;
