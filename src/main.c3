@@ -13,6 +13,8 @@ fn int main(String[] args)
 {
     const int WINDOW_WIDTH = 512;
     const int WINDOW_HEIGHT = 512;
+    const int MAP_WIDTH = 16;
+    const int MAP_HEIGHT = 16;
     const String MAP_DATA = 
         `0000222222220000`
         `1              0`
@@ -37,6 +39,12 @@ fn int main(String[] args)
         .height = WINDOW_HEIGHT,
         .bytes_per_pixel = BYTES_PER_PIXEL
     };
+    
+    Map map = {
+        .data = MAP_DATA,
+        .width = MAP_WIDTH,
+        .height = MAP_HEIGHT
+    };
 
     foreach(i, &pixel : image.pixels) {
         *pixel = {
@@ -46,12 +54,6 @@ fn int main(String[] args)
             0xFF
         };
     }
-    
-    Map map = {
-        .data = MAP_DATA,
-        .width = 16,
-        .height = 16
-    };
 
     int rect_width = image.width / map.width;
     int rect_height = image.height / map.height;
@@ -61,6 +63,8 @@ fn int main(String[] args)
             image.draw_rectangle(i * rect_width, j * rect_height, rect_width, rect_height, {0, 255, 255, 255});
         }
     }
+
+
     
     if(catch excuse = image.save("output.png")) {
         return 1;
