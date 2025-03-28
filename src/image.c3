@@ -36,6 +36,9 @@ fn void Image.draw_rectangle(Image* self, int x, int y, int width, int height, C
         for (int j = 0; j < height; ++j) {
             int cx = x + i;
             int cy = y + j;
+            if (cx < 0 || cx >= self.width || cy < 0 || cy >= self.height) {
+                continue;
+            }
             self.pixels[cx + cy * self.width] = color;
         }
     }
