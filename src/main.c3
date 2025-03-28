@@ -3,6 +3,8 @@ import std::io;
 import std::core::mem;
 import std::math;
 
+const bool GENERATE_ALL_FRAMES = false;
+
 const int WINDOW_WIDTH = 512;
 const int WINDOW_HEIGHT = 512;
 const int MAP_WIDTH = 16;
@@ -66,43 +68,85 @@ fn int main(String[] args)
         .a = 1.523,
     };
 
-    int rect_width = mapImage.width / map.width;
-    int rect_height = mapImage.height / map.height;
-    for (int j = 0; j < map.height; ++j) {
-        for (int i = 0; i<map.width; ++i) {
-            if (map.grid[i + j * map.width] == ' ') continue;
-            mapImage.draw_rectangle(i * rect_width, j * rect_height, rect_width, rect_height, {0, 255, 255, 255});
+    Color[] random_colors = {
+        {200, 50, 50, 255},   // Red
+        {50, 200, 50, 255},   // Green
+        {50, 50, 200, 255},   // Blue
+        {200, 200, 50, 255},  // Yellow
+        {200, 50, 200, 255},  // Magenta
+        {50, 200, 200, 255},  // Cyan
+    };
+
+    for(int frame = 0; frame < 360; ++frame) {
+        if(!GENERATE_ALL_FRAMES) {
+            frame = 100;
         }
-    }
-
-    int lastIndex = -1;
-    for (int i = 0; i < mapImage.width; ++i) {
-        float angle = player.a - FOV / 2 + FOV * i / (float)mapImage.width;
-        for (float t = 0; t < 20f; t += 0.05f) {
-            float cx = player.x + t * math::cos(angle);
-            float cy = player.y + t * math::sin(angle);
-            
-            int pix_x = (int)(cx * rect_width);
-            int pix_y = (int)(cy * rect_height);
-            
-            mapImage.pixels[pix_x + pix_y * mapImage.width] = {160, 160, 160, 255};
-
-            if (map.grid[(int)cx + (int)cy * map.width] != ' ') {
-                if (t > 0) {
-                    int column_height = (int)(worldImage.width / t);
-                    worldImage.draw_rectangle(i, (worldImage.height - column_height) / 2, 1, column_height, {0, 255, 255, 255});
-                }
-                break;
+        else {
+            foreach(&pixel : worldImage.pixels) {
+                *pixel = {0, 0, 0, 0};
+            }
+            foreach(&pixel : mapImage.pixels) {
+                *pixel = {0, 0, 0, 0};
             }
         }
-    }
-    
-    if (catch excuse = mapImage.save("map.png")) {
-        return 1;
-    }
 
-    if (catch excuse = worldImage.save("world.png")) {
-        return 1;
+        player.a += 2*math::PI / 360.0f;
+
+        int rect_width = mapImage.width / map.width;
+        int rect_height = mapImage.height / map.height;
+        for (int j = 0; j < map.height; ++j) {
+            for (int i = 0; i < map.width; ++i) {
+                if (map.grid[i + j * map.width] == ' ') continue;
+                mapImage.draw_rectangle(i * rect_width, j * rect_height, rect_width, rect_height, {0, 255, 255, 255});
+            }
+        }
+
+        for (int i = 0; i < mapImage.width; ++i) {
+            float angle = player.a - FOV / 2 + FOV * i / (float)mapImage.width;
+            for (float t = 0; t < 20f; t += 0.05f) {
+                float cx = player.x + t * math::cos(angle);
+                float cy = player.y + t * math::sin(angle);
+                
+                int pix_x = (int)(cx * rect_width);
+                int pix_y = (int)(cy * rect_height);
+                
+                mapImage.pixels[pix_x + pix_y * mapImage.width] = {160, 160, 160, 255};
+
+                char type = map.grid[(int)cx + (int)cy * map.width];
+                if (type != ' ') {
+                    Color color = random_colors[(type - '0') % 6];
+                    if (t > 0) {
+                        int column_height = (int)(worldImage.width / t);
+                        worldImage.draw_rectangle(i, (worldImage.height - column_height) / 2, 1, column_height, color);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        DString mapName = std::core::dstring::temp_with_capacity(20);
+        DString worldName = std::core::dstring::temp_with_capacity(20);
+
+        if(GENERATE_ALL_FRAMES) {
+            mapName.appendf("map%03d.png", frame);
+            worldName.appendf("world%03d.png", frame);
+        } else {
+            mapName.appendf("map.png");
+            worldName.appendf("world.png");
+        }
+
+        if (catch excuse = mapImage.save(mapName.zstr_view())) {
+            io::printf("Error saving map image: %s\n", excuse);
+            return 1;
+        }
+
+        if (catch excuse = worldImage.save(worldName.zstr_view())) {
+            return 1;
+        }
+
+        if(!GENERATE_ALL_FRAMES) {
+            break; // Remove this to save all frames
+        }
     }
 
     return 0;

@@ -20,14 +20,12 @@ struct Image {
     int bytes_per_pixel;
 }
 
-fn void! Image.save(Image* self, String filename)
+fn void! Image.save(Image* self, char* filename)
 {
     if (stbi_write_png(filename, self.width, self.height, self.bytes_per_pixel, self.pixels, self.width * self.bytes_per_pixel) == 0) {
-        io::printf("Failed to write image to file.");
+        io::printf("Failed to write image to %s\n", filename);
         return ImageResult.FILE_WRITE_ERROR?;
     }
-
-    io::printf("Image saved to %s\n", filename);
 }
 
 fn void Image.draw_rectangle(Image* self, int x, int y, int width, int height, Color color)
