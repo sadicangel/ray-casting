@@ -79,7 +79,7 @@ fn int main(String[] args)
 
     for(int frame = 0; frame < 360; ++frame) {
         if(!GENERATE_ALL_FRAMES) {
-            frame = 100;
+            frame = 90;
         }
         else {
             foreach(&pixel : worldImage.pixels) {
@@ -90,7 +90,7 @@ fn int main(String[] args)
             }
         }
 
-        player.a += 2*math::PI / 360.0f;
+        float player_angle = player.a + 2 * (float)math::PI * (frame / 360.0f);
 
         int rect_width = mapImage.width / map.width;
         int rect_height = mapImage.height / map.height;
@@ -102,10 +102,10 @@ fn int main(String[] args)
         }
 
         for (int i = 0; i < mapImage.width; ++i) {
-            float angle = player.a - FOV / 2 + FOV * i / (float)mapImage.width;
+            float ray_angle = player_angle - FOV / 2 + FOV * i / (float)mapImage.width;
             for (float t = 0; t < 20f; t += 0.05f) {
-                float cx = player.x + t * math::cos(angle);
-                float cy = player.y + t * math::sin(angle);
+                float cx = player.x + t * math::cos(ray_angle);
+                float cy = player.y + t * math::sin(ray_angle);
                 
                 int pix_x = (int)(cx * rect_width);
                 int pix_y = (int)(cy * rect_height);
