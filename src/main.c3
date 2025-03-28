@@ -116,7 +116,7 @@ fn int main(String[] args)
                 if (type != ' ') {
                     Color color = random_colors[(type - '0') % 6];
                     if (t > 0) {
-                        int column_height = (int)(worldImage.width / t);
+                        int column_height = (int)(worldImage.width / (t * std::math::cos(ray_angle - player_angle)));
                         worldImage.draw_rectangle(i, (worldImage.height - column_height) / 2, 1, column_height, color);
                     }
                     break;
