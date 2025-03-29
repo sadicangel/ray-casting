@@ -1,0 +1,30 @@
+module sdl::video;
+
+const ulong WINDOW_FULLSCREEN           = 0x0000000000000001;
+const ulong WINDOW_OPENGL               = 0x0000000000000002;
+const ulong WINDOW_OCCLUDED             = 0x0000000000000004;
+const ulong WINDOW_HIDDEN               = 0x0000000000000008;
+const ulong WINDOW_BORDERLESS           = 0x0000000000000010;
+const ulong WINDOW_RESIZABLE            = 0x0000000000000020;
+const ulong WINDOW_MINIMIZED            = 0x0000000000000040;
+const ulong WINDOW_MAXIMIZED            = 0x0000000000000080;
+const ulong WINDOW_MOUSE_GRABBED        = 0x0000000000000100;
+const ulong WINDOW_INPUT_FOCUS          = 0x0000000000000200;
+const ulong WINDOW_MOUSE_FOCUS          = 0x0000000000000400;
+const ulong WINDOW_EXTERNAL             = 0x0000000000000800;
+const ulong WINDOW_MODAL                = 0x0000000000001000;
+const ulong WINDOW_HIGH_PIXEL_DENSITY   = 0x0000000000002000;
+const ulong WINDOW_MOUSE_CAPTURE        = 0x0000000000004000;
+const ulong WINDOW_MOUSE_RELATIVE_MODE  = 0x0000000000008000;
+const ulong WINDOW_ALWAYS_ON_TOP        = 0x0000000000010000;
+const ulong WINDOW_UTILITY              = 0x0000000000020000;
+const ulong WINDOW_TOOLTIP              = 0x0000000000040000;
+const ulong WINDOW_POPUP_MENU           = 0x0000000000080000;
+const ulong WINDOW_KEYBOARD_GRABBED     = 0x0000000000100000;
+const ulong WINDOW_VULKAN               = 0x0000000010000000;
+const ulong WINDOW_METAL                = 0x0000000020000000;
+const ulong WINDOW_TRANSPARENT          = 0x0000000040000000;
+const ulong WINDOW_NOT_FOCUSABLE        = 0x0000000080000000;
+
+extern fn bool create_window_and_renderer(char *title, CInt width, int height, ulong window_flags, void **window, void **renderer) @extern("SDL_CreateWindowAndRenderer");
+extern fn void destroy_window(void *window) @extern("SDL_DestroyWindow");

@@ -36,6 +36,15 @@
     "C:/Program Files (x86)/Windows Kits/10/Include/10.0.26100.0/ucrt",
     "C:/Program Files/Microsoft Visual Studio/2022/Preview/VC/Tools/MSVC/14.44.34918/include"
   ],
+  "linked-libraries": [
+    "SDL3"
+  ],
+  "linker-search-paths": [
+    "lib"
+  ],
+  "exec": [
+    "pwsh --Command Copy-Item -Path '../lib/SDL3.dll' -Destination '../build'"
+  ],
   // Output location, relative to project file.
   "output": "build",
   // Architecture and OS target.

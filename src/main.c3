@@ -2,8 +2,11 @@ module ray_casting;
 import std::io;
 import std::core::mem;
 import std::math;
-
-const bool GENERATE_ALL_FRAMES = false;
+import sdl;
+import sdl::events;
+import sdl::render;
+import sdl::timer;
+import sdl::video;
 
 const int WINDOW_WIDTH = 512;
 const int WINDOW_HEIGHT = 512;
@@ -42,6 +45,31 @@ struct Player {
 
 fn int main(String[] args)
 {
+    if(!sdl::init(sdl::INIT_VIDEO)) {
+        io::printf("Failed to initialize SDL: %s\n", sdl::get_error());
+        return 1;
+    }
+    defer sdl::quit();
+
+    void* window = null;
+    void* renderer = null;
+
+    if(!video::create_window_and_renderer("Ray Casting", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer)) {
+        io::printf("Failed to create window and renderer: %s\n", sdl::get_error());
+        return 1;
+    }
+    defer {
+        render::destroy_renderer(renderer);
+        video::destroy_window(window);
+    }
+
+    void* framebuffer = render::create_texture(renderer, render::PIXELFORMAT_RGBA8888, render::TEXTUREACCESS_STREAMING, WINDOW_WIDTH, WINDOW_HEIGHT);
+    if(framebuffer == null) {
+        io::printf("Failed to create framebuffer texture: %s\n", sdl::get_error());
+        video::destroy_window(window);
+        return 1;
+    }
+
     Image worldImage = {
         .pixels = mem::new_array(Color, WINDOW_WIDTH * WINDOW_HEIGHT),
         .width = WINDOW_WIDTH,
@@ -55,7 +83,7 @@ fn int main(String[] args)
         .height = WINDOW_HEIGHT,
         .bytes_per_pixel = BYTES_PER_PIXEL
     };
-    
+
     Map map = {
         .grid = MAP_GRID,
         .width = MAP_WIDTH,
@@ -77,20 +105,31 @@ fn int main(String[] args)
         {50, 200, 200, 255},  // Cyan
     };
 
-    for(int frame = 0; frame < 360; ++frame) {
-        if(!GENERATE_ALL_FRAMES) {
-            frame = 90;
-        }
-        else {
-            foreach(&pixel : worldImage.pixels) {
-                *pixel = {0, 0, 0, 0};
-            }
-            foreach(&pixel : mapImage.pixels) {
-                *pixel = {0, 0, 0, 0};
-            }
+    Event event;
+    while (1) {
+        events::poll_event(&event);
+        if (event.type == events::EVENT_QUIT) {
+            break;
         }
 
-        float player_angle = player.a + 2 * (float)math::PI * (frame / 360.0f);
+        defer {
+            render::update_texture(framebuffer, null, worldImage.pixels, worldImage.width * worldImage.bytes_per_pixel);
+            render::render_clear(renderer);
+            render::render_texture(renderer, framebuffer, null, null);
+            render::render_present(renderer);
+            // We probably want to use timer::get_ticks() to get the time since the last frame
+            // and adjust the player position accordingly.
+            timer::delay(1000 / 60); // 60 FPS
+        }
+    
+        foreach(&pixel : worldImage.pixels) {
+            *pixel = {0, 0, 0, 0};
+        }
+        foreach(&pixel : mapImage.pixels) {
+            *pixel = {0, 0, 0, 0};
+        }
+
+        player.a += (2 / ((float)math::PI * 360f)) % 360f;
 
         int rect_width = mapImage.width / map.width;
         int rect_height = mapImage.height / map.height;
@@ -102,7 +141,7 @@ fn int main(String[] args)
         }
 
         for (int i = 0; i < mapImage.width; ++i) {
-            float ray_angle = player_angle - FOV / 2 + FOV * i / (float)mapImage.width;
+            float ray_angle = player.a - FOV / 2 + FOV * i / (float)mapImage.width;
             for (float t = 0; t < 20f; t += 0.05f) {
                 float cx = player.x + t * math::cos(ray_angle);
                 float cy = player.y + t * math::sin(ray_angle);
@@ -116,36 +155,12 @@ fn int main(String[] args)
                 if (type != ' ') {
                     Color color = random_colors[(type - '0') % 6];
                     if (t > 0) {
-                        int column_height = (int)(worldImage.width / (t * std::math::cos(ray_angle - player_angle)));
+                        int column_height = (int)(worldImage.width / (t * std::math::cos(ray_angle - player.a)));
                         worldImage.draw_rectangle(i, (worldImage.height - column_height) / 2, 1, column_height, color);
                     }
                     break;
                 }
             }
-        }
-        
-        DString mapName = std::core::dstring::temp_with_capacity(20);
-        DString worldName = std::core::dstring::temp_with_capacity(20);
-
-        if(GENERATE_ALL_FRAMES) {
-            mapName.appendf("map%03d.png", frame);
-            worldName.appendf("world%03d.png", frame);
-        } else {
-            mapName.appendf("map.png");
-            worldName.appendf("world.png");
-        }
-
-        if (catch excuse = mapImage.save(mapName.zstr_view())) {
-            io::printf("Error saving map image: %s\n", excuse);
-            return 1;
-        }
-
-        if (catch excuse = worldImage.save(worldName.zstr_view())) {
-            return 1;
-        }
-
-        if(!GENERATE_ALL_FRAMES) {
-            break; // Remove this to save all frames
         }
     }
 
