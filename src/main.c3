@@ -66,9 +66,12 @@ fn int main(String[] args)
     void* framebuffer = render::create_texture(renderer, render::PIXELFORMAT_RGBA8888, render::TEXTUREACCESS_STREAMING, WINDOW_WIDTH, WINDOW_HEIGHT);
     if(framebuffer == null) {
         io::printf("Failed to create framebuffer texture: %s\n", sdl::get_error());
-        video::destroy_window(window);
         return 1;
     }
+    defer render::destroy_texture(framebuffer);
+
+    Spritesheet walls = load_spritesheet("resources/walls.png", 64, 64)!!;
+    defer walls.free();
 
     Image worldImage = {
         .pixels = mem::new_array(Color, WINDOW_WIDTH * WINDOW_HEIGHT),
@@ -160,6 +163,13 @@ fn int main(String[] args)
                     }
                     break;
                 }
+            }
+        }
+
+        Image wall = walls.get_sprite(4)!!;
+        for(int i = 0; i < wall.width; ++i) {
+            for(int j = 0; j < wall.height; ++j) {
+                mapImage.pixels[i + j * worldImage.width] = wall.pixels[i + 4 * wall.width + j * wall.height * walls.sprite_count];
             }
         }
     }

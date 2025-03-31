@@ -4,12 +4,15 @@ import std::core::mem;
 import std::math;
 
 extern fn int stbi_write_png(char* filename, int x, int y, int comp, void* data, int stride_bytes);
+extern fn char* stbi_load(char* filename, int* x, int* y, int* comp, int req_comp);
+extern fn void stbi_image_free(void *retval_from_stbi_load);
 
 const int BYTES_PER_PIXEL = 4;
 
 def Color = char[<BYTES_PER_PIXEL>];
 
 fault ImageResult {
+    FILE_LOAD_ERROR,
     FILE_WRITE_ERROR,
 }
 
