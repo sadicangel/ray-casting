@@ -1,5 +1,6 @@
 module ray_casting;
 import std::io;
+import sdl::rect;
 
 struct Spritesheet {
     Image image;
@@ -18,7 +19,7 @@ fn void Spritesheet.free(Spritesheet* self) {
     stbi_image_free(self.image.pixels);
 }
 
-fn Image! Spritesheet.get_sprite(Spritesheet* self, int index) {
+fn Rect(<int>)! Spritesheet.get_sprite_rect(Spritesheet* self, int index) {
     if (index < 0 || index >= self.sprite_count) {
         io::printf("Sprite index out of bounds: %d\n", index);
         return SpritesheetResult.SPRITE_INDEX_OUT_OF_BOUNDS?;
@@ -28,14 +29,12 @@ fn Image! Spritesheet.get_sprite(Spritesheet* self, int index) {
     int x = (index % sprites_per_row) * self.sprite_width;
     int y = (index / sprites_per_row) * self.sprite_height;
 
-    Image sprite = {
-        .pixels = self.image.pixels[((y * self.image.width + x) * self.image.bytes_per_pixel)..],
-        .width = self.sprite_width,
-        .height = self.sprite_height,
-        .bytes_per_pixel = self.image.bytes_per_pixel
+    return {
+        .x = x,
+        .y = y,
+        .w = self.sprite_width,
+        .h = self.sprite_height
     };
-
-    return sprite;
 }
 
 fn Spritesheet! load_spritesheet(String filename, int sprite_width, int sprite_height) {
@@ -45,16 +44,26 @@ fn Spritesheet! load_spritesheet(String filename, int sprite_width, int sprite_h
         io::printf("Failed to load texture: %s\n", filename);
         return SpritesheetResult.FILE_LOAD_ERROR?;
     }
-
-    defer catch stbi_image_free(data);
+    defer stbi_image_free(data);
 
     if(bytes_per_pixel != BYTES_PER_PIXEL) {
         io::printf("Image format not supported: %d bytes per pixel\n", bytes_per_pixel);
         return SpritesheetResult.UNSUPPORTED_FORMAT?;
     }
 
+    Color[] rgba_pixels = mem::new_array(Color, (usz)(width * height));
+    for (int j = 0; j < height; j++) {
+        for (int i=0; i < width; i++) {
+            char r = data[(i + j * width) * 4 + 0];
+            char g = data[(i + j * width) * 4 + 1];
+            char b = data[(i + j * width) * 4 + 2];
+            char a = data[(i + j * width) * 4 + 3];
+            rgba_pixels[i + j * width] = {r, g, b, a};
+        }
+    }
+
     Image img = {
-        .pixels = *(Color[]*)&data,
+        .pixels = rgba_pixels,
         .width = width,
         .height = height,
         .bytes_per_pixel = bytes_per_pixel

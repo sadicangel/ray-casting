@@ -126,10 +126,10 @@ fn int main(String[] args)
         }
     
         foreach(&pixel : worldImage.pixels) {
-            *pixel = {0, 0, 0, 0};
+            *pixel = {255, 255, 255, 255};
         }
         foreach(&pixel : mapImage.pixels) {
-            *pixel = {0, 0, 0, 0};
+            *pixel = {255, 255, 255, 255};
         }
 
         player.a += (2 / ((float)math::PI * 360f)) % 360f;
@@ -151,7 +151,7 @@ fn int main(String[] args)
                 
                 int pix_x = (int)(cx * rect_width);
                 int pix_y = (int)(cy * rect_height);
-                
+
                 mapImage.pixels[pix_x + pix_y * mapImage.width] = {160, 160, 160, 255};
 
                 char type = map.grid[(int)cx + (int)cy * map.width];
@@ -166,10 +166,11 @@ fn int main(String[] args)
             }
         }
 
-        Image wall = walls.get_sprite(4)!!;
-        for(int i = 0; i < wall.width; ++i) {
-            for(int j = 0; j < wall.height; ++j) {
-                mapImage.pixels[i + j * worldImage.width] = wall.pixels[i + 4 * wall.width + j * wall.height * walls.sprite_count];
+        Rect(<int>) wall = walls.get_sprite_rect(3)!!;
+        for (int i = 0; i < wall.w; ++i) {
+            for (int j = 0; j < wall.h; ++j) {
+                worldImage.pixels[i + j * worldImage.width] =
+                    walls.image.pixels[(wall.x + i) + (wall.y + j) * walls.image.width];
             }
         }
     }
